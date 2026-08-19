@@ -63,3 +63,5 @@ If frontend and backend are deployed separately, define `window.CHAT_API_URL` be
 ## Video Submission
 
 The walkthrough video should show the live chatbot, a context-aware follow-up, the backend use of `process.env.OPENROUTER_API_KEY`, and this README’s API/model, security, and fallback sections. The uploaded Drive file must be shared as “Anyone with the link can view.”
+
+**Video:** https://drive.google.com/file/d/1XkyhN675qoALjVTULwi46lqRV1S7LP65/view?usp=sharing
