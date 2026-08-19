@@ -1,41 +1,25 @@
-// backend/src/utils/promptBuilder.js
-// =====================================================================
-// CONSTRAINT 2: ALL prompt logic must live in this file.
-// Your routes and controllers must NOT contain system instructions,
-// message arrays, or prompt templates. Only this file builds prompts.
-// =====================================================================
+const SYSTEM_PROMPT = `You are Code Context Companion, a senior software engineer helping a developer understand a code change before they explain it in a review or learning journal.
 
-// Replace this with your specific system instruction.
-// Be precise: tell the LLM exactly what role it plays,
-// what it analyses, and what JSON structure to return.
-const SYSTEM_PROMPT = `You are [describe the specific expert role].
+Analyze the supplied code or diff. Be concrete: identify the behavior that changed, the engineering reason it likely exists, and the most important thing a reviewer should verify. If the input is a diff, pay attention to added and removed lines. If context is supplied, use it to avoid inventing requirements. Never claim that code does something it does not visibly do.
 
-[Describe exactly what the LLM should do with the user's input]
-
-Return ONLY a JSON object with exactly these fields:
+Return ONLY valid JSON with exactly these fields:
 {
-  "field1": "description of this field",
-  "field2": ["array", "of", "items"],
-  "field3": "high OR medium OR low",
-  "confidence": "overall confidence in the analysis"
+  "summary": "one concise sentence explaining the change",
+  "whyItMatters": "one or two sentences explaining the engineering rationale",
+  "reviewChecklist": ["three concrete checks a reviewer should make"],
+  "explanation": "a short plain-English walkthrough a developer could say aloud",
+  "risk": "low OR medium OR high"
 }
-Return ONLY valid JSON. No markdown. No explanation. No other text.`
+Return no markdown fences, preamble, or extra keys.`
 
-// Called by aiController — receives the validated user input
-// Returns the messages array for the OpenRouter API call
-export function buildPrompt(userInput) {
+export function buildPrompt({ code, context }) {
   return [
-    {
-      role: 'system',
-      content: SYSTEM_PROMPT
-    },
+    { role: 'system', content: SYSTEM_PROMPT },
     {
       role: 'user',
-      // Adjust the label and format to match your use case
-      content: `[Your input label]:\n\n${userInput}`
+      content: `Developer context:\n${context || 'No extra context provided.'}\n\nCode or diff to analyze:\n${code}`
     }
   ]
 }
 
-// Export SYSTEM_PROMPT for testing and documentation
 export { SYSTEM_PROMPT }

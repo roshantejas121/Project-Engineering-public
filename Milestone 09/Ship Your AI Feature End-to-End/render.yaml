@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: code-context-companion-api
+    runtime: node
+    rootDir: Milestone 09/Ship Your AI Feature End-to-End/backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: FRONTEND_URLS
+        sync: false
+      - key: NODE_ENV
+        value: production
