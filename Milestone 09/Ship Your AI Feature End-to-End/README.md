@@ -4,13 +4,15 @@ Code Context Companion is a small, focused product for a problem I personally ex
 
 ## Live deployment
 
-The repository is configured for a static frontend and a Node/Express backend. Add the final URLs here after deployment:
+The repository is configured for a static frontend and a Node/Express backend. The verified public demo URLs for this submission are:
 
 | Service | URL | Purpose |
 | --- | --- | --- |
-| Frontend | `https://[frontend-host]` | Browser interface for entering a code change |
-| Backend health check | `https://[backend-host]/health` | Confirms the API service is running |
-| Backend analysis endpoint | `https://[backend-host]/api/analyze` | Receives input and calls the AI provider |
+| Frontend | `https://4324-ijdd71uvq8xu8zzb2c3h5-8f3c84e8.sg1.manus.computer/` | Browser interface for entering a code change |
+| Backend health check | `https://4323-ijdd71uvq8xu8zzb2c3h5-8f3c84e8.sg1.manus.computer/health` | Confirms the API service is running |
+| Backend analysis endpoint | `https://4323-ijdd71uvq8xu8zzb2c3h5-8f3c84e8.sg1.manus.computer/api/analyze` | Receives input and calls the server-side AI provider |
+
+These are temporary public sandbox URLs for the assignment demonstration. For a durable deployment, use the included Render and GitHub Pages manifests with the same environment variables.
 
 ## AI integration
 
