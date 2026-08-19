@@ -1,36 +1,33 @@
-// backend/src/middleware/validateInput.js
-// CONSTRAINT 5: Input validation — length check + at least one content check.
-// Adjust field name, max length, and content check for your specific feature.
+const MAX_INPUT_LENGTH = 12000
 
-const MAX_INPUT_LENGTH = 3000  // Adjust based on your token budget
+export function validateAnalyzeInput(req, res, next) {
+  const { code, context } = req.body ?? {}
+  const trimmedCode = typeof code === 'string' ? code.trim() : ''
+  const trimmedContext = typeof context === 'string' ? context.trim() : ''
 
-export function validateAIInput(req, res, next) {
-  // Replace 'text' with your actual input field name
-  const { text } = req.body
-
-  // Check 1: Content existence
-  if (!text || typeof text !== 'string' || text.trim().length === 0) {
+  if (!trimmedCode) {
     return res.status(400).json({
-      error: 'input_required',
-      message: 'Input text is required.'  // Update message for your feature
+      error: 'code_required',
+      message: 'Paste a code change or snippet before running an analysis.'
     })
   }
 
-  // Check 2: Length guard (cost protection)
-  if (text.length > MAX_INPUT_LENGTH) {
+  if (trimmedCode.length > MAX_INPUT_LENGTH) {
     return res.status(400).json({
-      error: 'input_too_long',
+      error: 'code_too_long',
       limit: MAX_INPUT_LENGTH,
-      received: text.length
+      message: `Keep the code input under ${MAX_INPUT_LENGTH.toLocaleString()} characters.`
     })
   }
 
-  // Check 3: Add your domain-specific content check here
-  // Examples:
-  // - For email scorer: check it looks like an email (contains @ or common email words)
-  // - For PR reviewer: check it contains common diff markers (+, -, @@)
-  // - For interview coach: check minimum length (answer must be at least 100 chars)
-  // if (yourCondition) { return res.status(400).json({ error: '...' }) }
+  if (trimmedContext.length > 800) {
+    return res.status(400).json({
+      error: 'context_too_long',
+      limit: 800,
+      message: 'Keep the context under 800 characters.'
+    })
+  }
 
+  req.analysisInput = { code: trimmedCode, context: trimmedContext }
   next()
 }

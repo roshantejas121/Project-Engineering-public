@@ -1,0 +1,10 @@
+
+# Local dependencies and environment files
+node_modules/
+.env
+.env.*
+!.env.example
+
+# Build output
+**/dist/
+**/build/
