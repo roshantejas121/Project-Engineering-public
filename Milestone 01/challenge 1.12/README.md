@@ -52,8 +52,8 @@ If frontend and backend are deployed separately, define `window.CHAT_API_URL` be
 
 ## Live Deployment
 
-**Frontend URL:** To be added after deployment  
-**Backend URL:** To be added after deployment
+**Frontend URL:** https://3100-if8qgc8eltsax24pbmsw1-9f6b4420.sg1.manus.computer  
+**Backend URL:** https://3100-if8qgc8eltsax24pbmsw1-9f6b4420.sg1.manus.computer
 
 ## Pull Request
 
