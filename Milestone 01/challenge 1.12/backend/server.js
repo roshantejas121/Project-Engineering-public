@@ -2,37 +2,84 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const fetch = require('node-fetch');
+const path = require('path');
 
-// Initialize dotenv at the top
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const OPENROUTER_URL = process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1/chat/completions';
+const MODEL = process.env.OPENROUTER_MODEL || 'openai/gpt-4o-mini';
 
-// Enable CORS and JSON parsing
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '100kb' }));
 
-// Health check route to verify server status
-app.get('/health', (req, res) => {
-  res.json({ status: "ok" });
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok' });
 });
 
-/**
- * AI Chat Route
- * This is where the magic happens.
- */
 app.post('/chat', async (req, res) => {
-  // TODO: Implement the AI chat route
-  // 1. Extract `messages` from req.body
-  // 2. Read API key from process.env.OPENROUTER_API_KEY
-  // 3. POST to https://openrouter.ai/api/v1/chat/completions
-  //    with Authorization: Bearer <key> and the messages array
-  // 4. Return the AI reply as { reply: "..." }
-  
-  // Placeholder response (will be replaced by student)
-  res.status(501).json({ error: "Method Not Implemented" });
+  const { messages } = req.body || {};
+  const apiKey = process.env.OPENROUTER_API_KEY;
+
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return res.status(400).json({ error: 'messages must be a non-empty array' });
+  }
+
+  const hasValidMessages = messages.every(
+    (message) =>
+      message &&
+      ['system', 'user', 'assistant'].includes(message.role) &&
+      typeof message.content === 'string' &&
+      message.content.trim().length > 0,
+  );
+
+  if (!hasValidMessages) {
+    return res.status(400).json({
+      error: 'Each message must include a valid role and non-empty string content',
+    });
+  }
+
+  if (!apiKey || apiKey === 'your-openrouter-api-key-here') {
+    return res.status(500).json({
+      error: 'OPENROUTER_API_KEY is not configured on the backend',
+    });
+  }
+
+  try {
+    const response = await fetch(OPENROUTER_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      const providerMessage = data?.error?.message || 'OpenRouter request failed';
+      return res.status(502).json({ error: providerMessage });
+    }
+
+    const reply = data?.choices?.[0]?.message?.content;
+    if (typeof reply !== 'string' || reply.trim().length === 0) {
+      return res.status(502).json({ error: 'OpenRouter returned an empty response' });
+    }
+
+    return res.json({ reply });
+  } catch (error) {
+    console.error('OpenRouter request failed:', error.message);
+    return res.status(502).json({ error: 'Unable to reach the AI provider' });
+  }
 });
+
+// Serve the frontend from the same service for a simple deployed demo.
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

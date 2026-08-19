@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: ai-chatbot-challenge-112
+    runtime: node
+    rootDir: Milestone 01/challenge 1.12
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    healthCheckPath: /health
+    envVars:
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: PORT
+        value: 10000
