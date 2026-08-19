@@ -1,8 +1,13 @@
 import fetch from 'node-fetch'
 import { buildPrompt } from '../utils/promptBuilder.js'
 
-const MODEL = 'openai/gpt-4o-mini'
+const MODEL = process.env.AI_MODEL || 'openai/gpt-4o-mini'
 const TIMEOUT_MS = 15000
+const API_BASE_URL = (process.env.AI_API_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/$/, '')
+
+function getApiKey() {
+  return process.env.AI_API_KEY || process.env.OPENROUTER_API_KEY
+}
 
 function serviceError(message, statusCode = 502) {
   const error = new Error(message)
@@ -12,7 +17,7 @@ function serviceError(message, statusCode = 502) {
 }
 
 export async function callCodeContextAI({ code, context, clientId }) {
-  if (!process.env.OPENROUTER_API_KEY) {
+  if (!getApiKey()) {
     throw serviceError('The AI service is not configured yet. Add an API key on the backend.', 503)
   }
 
@@ -20,10 +25,10 @@ export async function callCodeContextAI({ code, context, clientId }) {
   const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS)
 
   try {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const response = await fetch(`${API_BASE_URL}/chat/completions`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        Authorization: `Bearer ${getApiKey()}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': process.env.FRONTEND_URL || 'http://localhost:5173',
         'X-Title': 'Code Context Companion'
@@ -31,7 +36,7 @@ export async function callCodeContextAI({ code, context, clientId }) {
       body: JSON.stringify({
         model: MODEL,
         messages: buildPrompt({ code, context }),
-        max_tokens: 650,
+        max_completion_tokens: 650,
         temperature: 0.2,
         response_format: { type: 'json_object' }
       }),
