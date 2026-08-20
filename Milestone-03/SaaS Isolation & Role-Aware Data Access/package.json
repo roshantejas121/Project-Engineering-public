@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "seed": "psql -U postgres -d corpflow -f schema.sql"
+    "seed": "psql -U postgres -d corpflow -f schema.sql",
+    "test": "node --test test/security.test.js"
   },
   "dependencies": {
     "dotenv": "^16.3.1",
@@ -14,6 +15,8 @@
     "pg": "^8.11.3"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.1",
+    "proxyquire": "^2.1.3",
+    "supertest": "^7.2.2"
   }
 }

@@ -1,12 +1,10 @@
 const express = require('express');
-const app = express();
 const usersRouter = require('./routes/users');
 const projectsRouter = require('./routes/projects');
 
-// JSON parsing middleware
+const app = express();
 app.use(express.json());
 
-// Main entry route
 app.get('/', (req, res) => {
   res.json({
     name: 'CorpFlow SaaS API',
@@ -16,20 +14,15 @@ app.get('/', (req, res) => {
   });
 });
 
-// Register routers
 app.use('/users', usersRouter);
 app.use('/projects', projectsRouter);
+app.use((req, res) => res.status(404).json({ error: 'Endpoint not found.' }));
 
-// Basic 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: 'Endpoint not found.' });
-});
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`CorpFlow SaaS API running on port ${PORT}`);
+  });
+}
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`\n🚀 CorpFlow SaaS API Running on port ${PORT}`);
-  console.log('------------------------------------------');
-  console.log(`Root:     http://localhost:${PORT}/`);
-  console.log(`Users:    http://localhost:${PORT}/users`);
-  console.log(`Projects: http://localhost:${PORT}/projects\n`);
-});
+module.exports = app;
