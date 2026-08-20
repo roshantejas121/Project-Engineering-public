@@ -38,19 +38,22 @@ Welcome to the LedgerApp starter repository! This is a core financial API design
 - `GET /users`: List all users.
 - `GET /users/:id`: Get user details.
 - `POST /users`: Create a new user.
-- `DELETE /users/:id`: Delete a user account from the system.
+- `DELETE /users/:id`: Soft-delete a user account without removing its audit history.
+- `GET /users/admin/deleted`: Admin view of soft-deleted users.
 
 ### 💳 Accounts
 - `GET /accounts`: List all bank accounts.
 - `GET /accounts/user/:userId`: List all accounts specifically for a user.
 - `POST /accounts`: Create a new checking/savings account.
-- `DELETE /accounts/:id`: Remove an account from the database.
+- `DELETE /accounts/:id`: Soft-delete an account without removing its audit history.
+- `GET /accounts/admin/deleted`: Admin view of soft-deleted accounts.
 
 ### 💸 Transactions
 - `GET /transactions`: List all global transactions.
 - `GET /transactions/account/:accountId`: List all transactions for a specific account.
 - `POST /transactions`: Post a new credit/debit transaction.
-- `DELETE /transactions/:id`: Erase a transaction record permanently.
+- `DELETE /transactions/:id`: Soft-delete a transaction without erasing its audit history.
+- `GET /transactions/admin/deleted`: Admin view of soft-deleted transactions.
 
 ---
 
