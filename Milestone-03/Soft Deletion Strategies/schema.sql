@@ -8,8 +8,11 @@ CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP WITH TIME ZONE DEFAULT NULL
 );
+
+CREATE INDEX idx_users_active ON users(id) WHERE deleted_at IS NULL;
 
 -- Accounts table stores checking or savings details for each user
 CREATE TABLE accounts (
@@ -17,8 +20,11 @@ CREATE TABLE accounts (
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     account_type VARCHAR(50) NOT NULL, -- 'checking' or 'savings'
     balance DECIMAL(15, 2) DEFAULT 0.00,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP WITH TIME ZONE DEFAULT NULL
 );
+
+CREATE INDEX idx_accounts_active ON accounts(id) WHERE deleted_at IS NULL;
 
 -- Transactions table stores all credit and debit movements
 CREATE TABLE transactions (
@@ -27,5 +33,8 @@ CREATE TABLE transactions (
     amount DECIMAL(15, 2) NOT NULL,
     type VARCHAR(50) NOT NULL, -- 'credit' or 'debit'
     description TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP WITH TIME ZONE DEFAULT NULL
 );
+
+CREATE INDEX idx_transactions_active ON transactions(id) WHERE deleted_at IS NULL;
