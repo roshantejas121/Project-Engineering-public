@@ -1,35 +1,75 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const prisma = require('./lib/db');
+
+function parseId(value) {
+  const id = Number(value);
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
+
+function apiError(message, statusCode) {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  return error;
+}
 
 async function purchaseItem(req, res) {
+  const userId = parseId(req.body.userId);
+  const productId = parseId(req.body.productId);
+
+  if (!userId || !productId) {
+    return res.status(400).json({
+      error: 'userId and productId must be positive integers',
+    });
+  }
+
   try {
-    const { userId, productId } = req.body;
+    const [user, product] = await Promise.all([
+      prisma.user.findUnique({ where: { id: userId } }),
+      prisma.product.findUnique({ where: { id: productId } }),
+    ]);
 
-    const product = await prisma.product.findUnique({ where: { id: productId } });
-    console.log('Product price:', product.price); 
+    if (!user) {
+      throw apiError('User not found', 404);
+    }
 
-    const order = await prisma.order.create({
-      data: { userId, productId, quantity: 1 },
-    });
+    if (!product) {
+      throw apiError('Product not found', 404);
+    }
 
-    await prisma.product.update({
-      where: { id: productId },
-      data: { stock: { decrement: 1 } },
-    });
+    if (product.stock < 1) {
+      throw apiError('Product is out of stock', 409);
+    }
 
-    res.status(201).json({ order });
+    const [order] = await prisma.$transaction([
+      prisma.order.create({
+        data: { userId, productId, quantity: 1 },
+      }),
+      prisma.product.update({
+        where: { id: productId },
+        data: { stock: { decrement: 1 } },
+      }),
+    ]);
+
+    return res.status(201).json({ order });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(err.statusCode || 500).json({ error: err.message });
   }
 }
 
 async function getOrdersByUser(req, res) {
+  const userId = parseId(req.params.userId);
+
+  if (!userId) {
+    return res.status(400).json({ error: 'User id must be a positive integer' });
+  }
+
   try {
-    const userId = parseInt(req.params.userId);
-    const orders = await prisma.order.findMany({ where: { userId } });
-    res.json(orders);
+    const orders = await prisma.order.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+    return res.json(orders);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 }
 
